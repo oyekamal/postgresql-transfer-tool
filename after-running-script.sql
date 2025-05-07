@@ -78,3 +78,49 @@ BEGIN
     -- Final notice
     RAISE NOTICE 'All sequences reset successfully.';
 END $$;
+
+
+
+DO $$ 
+DECLARE 
+    table_name TEXT;
+    sequence_name TEXT;
+BEGIN
+    -- Loop through all tables in the specified schema
+    FOR table_name IN 
+        SELECT tablename 
+        FROM pg_tables 
+        WHERE schemaname = 'fde-local'
+    LOOP
+        -- Try to get the sequence associated with the 'id' column
+        BEGIN
+            SELECT pg_get_serial_sequence('fde-local.' || table_name, 'id') INTO sequence_name;
+            IF sequence_name IS NOT NULL THEN
+                EXECUTE format(
+                    'SELECT setval(%L, COALESCE((SELECT MAX(id) FROM "fde-local".%I), 0) + 1, false)',
+                    sequence_name, table_name
+                );
+                RAISE NOTICE 'Sequence for "id" column in table % reset successfully.', table_name;
+            END IF;
+ 
+            -- Now handle 'history_id' if it exists
+            BEGIN
+                SELECT pg_get_serial_sequence('fde-local.' || table_name, 'history_id') INTO sequence_name;
+ 
+                IF sequence_name IS NOT NULL THEN
+                    EXECUTE format(
+                        'SELECT setval(%L, COALESCE((SELECT MAX(history_id) FROM "fde-local".%I), 0) + 1, false)',
+                        sequence_name, table_name
+                    );
+                    RAISE NOTICE 'Sequence for "history_id" column in table % reset successfully.', table_name;
+                END IF;
+            EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE 'No "history_id" column or other error for table %.', table_name;
+            END;
+ 
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Error processing table %: %', table_name, SQLERRM;
+        END;
+    END LOOP;
+    RAISE NOTICE 'All sequences reset successfully.';
+END $$;
