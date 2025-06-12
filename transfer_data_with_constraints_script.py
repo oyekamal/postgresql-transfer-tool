@@ -28,14 +28,10 @@ target_engine = create_engine(target_conn_str)
 
 # Define source and target schemas
 source_schema = "public"  # Adjust as needed
-target_schema = "test5"  # Adjust target schema if needed
+target_schema = "public"  # Adjust target schema if needed
 
 # Tables to exclude from transfer
 tables_to_exclude = [
-    "public.tenants_tenant",
-    "public.tenants_domain",
-    "public.analytics_analyticsevent",
-    "public.silk_response",
 ]
 
 # Reflect source metadata

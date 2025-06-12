@@ -20,14 +20,10 @@ target_engine = create_engine(target_conn_str)
 
 # Define source and target schemas
 source_schema = "public"  # Replace with your source schema name if needed
-target_schema = "omar"
+target_schema = "public"
 
 # Tables to exclude from transfer
 tables_to_exclude = [
-    "public.tenants_tenant",
-    "public.tenants_domain",
-    "public.analytics_analyticsevent",
-    "public.silk_response",
 ]
 
 # Connect to the source database
